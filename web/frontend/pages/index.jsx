@@ -1,13 +1,13 @@
 import  { useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { BsFillPeopleFill } from 'react-icons/bs';
-import { FaBell, FaBoxOpen, FaFilter, FaSearch, FaShopify, FaTruckMoving, FaWallet } from 'react-icons/fa';
+import { FaBell, FaBoxOpen,  FaSearch, FaShopify, FaTruckMoving, FaWallet } from 'react-icons/fa';
 import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import Card from 'react-bootstrap/Card';
 import { BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid } from 'recharts';
-import Dropdown from 'react-bootstrap/Dropdown';
+
 
 
 import {
@@ -16,6 +16,9 @@ import {
   useIndexResourceState,
   Text,
   Badge,
+  OptionList,
+  Button,
+  Popover,
 } from '@shopify/polaris';
 
 
@@ -132,6 +135,36 @@ export default function HomePage() {
   );
 
 
+  const ranges = [
+
+    {
+      title: "Today",
+      alias: "today",
+      period: {
+        since: "today",
+        until: "today",
+      },
+    },
+    {
+      title: "Yesterday",
+      alias: "yesterday",
+      period: {
+        since: "yesterday",
+        until: "yesterday",
+      },
+    },
+    {
+      title: "Last 7 days",
+      alias: "last7days",
+      period: {
+        since: "-7d",
+        until: "-1d",
+      },
+    },
+  ];
+  const [selected, setSelected] = useState(ranges[0]);
+  const [popoverActive, setPopoverActive] = useState(false);
+
   return (
     <div>
       <header>
@@ -216,19 +249,40 @@ export default function HomePage() {
 <section>
 <div className='m-4'>
 <LegacyCard>
-<Dropdown>
-      <Dropdown.Toggle  id="dropdown-basic"
-      className='m-4 btn-sm' variant="outline-secondary">Filter  <FaFilter/>
-      </Dropdown.Toggle>
 
-      <Dropdown.Menu>
-        <Dropdown.Item>Sort by Date</Dropdown.Item>
-        <Dropdown.Item>Payment status</Dropdown.Item>
-        <Dropdown.Item>Fulfillment status</Dropdown.Item>
-      </Dropdown.Menu>
-    </Dropdown>
+<div className='m-3'>
+<Popover 
+      autofocusTarget="none"
+      preferredAlignment="left"
+      preferInputActivator={false}
+      preferredPosition="below"
+      activator={
+        <Button
+          onClick={() => setPopoverActive(!popoverActive)}
+          
+        >
+          {selected.title}
+        </Button>
+      }
+      active={popoverActive}
+    >
+      <OptionList
+        options={ranges.map((range) => ({
+          value: range.alias,
+          label: range.title,
+        }))}
+        selected={selected.alias}
+        onChange={(value) => {
+          setSelected(ranges.find((range) => range.alias === value[0]));
+          setPopoverActive(false);
+        }}
+      />
+    </Popover>
 
-      <IndexTable
+</div>
+
+<div className='mt-3'>
+<IndexTable 
         resourceName={resourceName}
         itemCount={orders.length}
         selectedItemsCount={
@@ -246,11 +300,14 @@ export default function HomePage() {
       >
         {rowMarkup}
       </IndexTable>
+</div>
+
     </LegacyCard>
 
 </div>
 
 </section>
+
 
 
     </div>
